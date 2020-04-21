@@ -75,6 +75,15 @@ func TestNew(t *testing.T) {
 				Segment{IsParam: true, Param: ""},
 			}},
 		},
+
+		{
+			"api/:param/:opt?",
+			Path{Segments: []Segment{
+				Segment{Const: "api"},
+				Segment{IsParam: true, IsOptional: false, Param: "param"},
+				Segment{IsParam: true, IsOptional: true, Param: "opt"},
+			}},
+		},
 	}
 
 	for _, tt := range testCases {
@@ -339,6 +348,12 @@ func TestMatch(t *testing.T) {
 			"/users/foo/files",
 			Match{},
 			false,
+		},
+		{
+			"/:foo/:bar?/:baz",
+			"/foo/bar/baz",
+			Match{Params: map[string]string{"foo": "foo", "bar": "bar", "baz": "baz"}, Trailing: ""},
+			true,
 		},
 	}
 

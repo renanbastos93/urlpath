@@ -6,7 +6,9 @@
 // to validate and parse an inputted path.
 package urlpath
 
-import "strings"
+import (
+	"strings"
+)
 
 // Path is a representation of a sequence of segments.
 //
@@ -23,6 +25,9 @@ type Path struct {
 type Segment struct {
 	// Whether this segment is parameterized.
 	IsParam bool
+
+	// When parameter is optional using ?
+	IsOptional bool
 
 	// The name of the parameter this segment will be mapped to.
 	Param string
@@ -110,6 +115,14 @@ func New(path string) Path {
 
 	for i := 0; i < len(outSegments); i++ {
 		if strings.HasPrefix(inSegments[i], ":") {
+			if strings.Contains(inSegments[i], "?") {
+				outSegments[i] = Segment{
+					IsParam:    true,
+					IsOptional: true,
+					Param:      inSegments[i][1 : len(inSegments[i])-1],
+				}
+				continue
+			}
 			outSegments[i] = Segment{IsParam: true, Param: inSegments[i][1:]}
 		} else {
 			outSegments[i] = Segment{IsParam: false, Const: inSegments[i]}
