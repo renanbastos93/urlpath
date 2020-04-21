@@ -166,8 +166,10 @@ func (p *Path) Match(s string) (Match, bool) {
 			// trailing input is allowed, it's never ok for an input to have fewer
 			// slashes than the path has segments (an equal number is ok, and
 			// corresponds to a trailing part with no slashes in it).
-			if (segmentIndex != len(p.Segments)-1 && p.Segments[segmentIndex].IsOptional) || p.Trailing {
-				return Match{}, false
+			if segmentIndex != len(p.Segments)-1 || p.Trailing {
+				if p.Segments[segmentIndex].IsOptional {
+					return Match{}, false
+				}
 			}
 		} else {
 			// If we have slashes left over and we are not ok with trailing input,
