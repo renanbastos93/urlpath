@@ -6,7 +6,9 @@
 // to validate and parse an inputted path.
 package urlpath
 
-import "strings"
+import (
+	"strings"
+)
 
 // Path is a representation of a sequence of segments.
 //
@@ -23,6 +25,9 @@ type Path struct {
 type Segment struct {
 	// Whether this segment is parameterized.
 	IsParam bool
+
+	// When parameter is optional using ?
+	IsOptional bool
 
 	// The name of the parameter this segment will be mapped to.
 	Param string
@@ -110,7 +115,18 @@ func New(path string) Path {
 
 	for i := 0; i < len(outSegments); i++ {
 		if strings.HasPrefix(inSegments[i], ":") {
-			outSegments[i] = Segment{IsParam: true, Param: inSegments[i][1:]}
+			if strings.Contains(inSegments[i], "?") {
+				outSegments[i] = Segment{
+					IsParam:    true,
+					IsOptional: true,
+					Param:      inSegments[i][1 : len(inSegments[i])-1],
+				}
+				continue
+			}
+			outSegments[i] = Segment{
+				IsParam:    true,
+				IsOptional: false,
+				Param:      inSegments[i][1:]}
 		} else {
 			outSegments[i] = Segment{IsParam: false, Const: inSegments[i]}
 		}
@@ -153,7 +169,7 @@ func (p *Path) Match(s string) (Match, bool) {
 			// trailing input is allowed, it's never ok for an input to have fewer
 			// slashes than the path has segments (an equal number is ok, and
 			// corresponds to a trailing part with no slashes in it).
-			if segmentIndex != len(p.Segments)-1 || p.Trailing {
+			if (segmentIndex != len(p.Segments)-1 && p.Segments[segmentIndex].IsOptional) || p.Trailing {
 				return Match{}, false
 			}
 		} else {
@@ -174,7 +190,6 @@ func (p *Path) Match(s string) (Match, bool) {
 
 		s = s[j:]
 	}
-
 	return Match{Params: params, Trailing: s}, true
 }
 
