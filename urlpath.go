@@ -7,6 +7,7 @@
 package urlpath
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -167,6 +168,7 @@ func (p *Path) Match(s string) (Match, bool) {
 			// slashes than the path has segments (an equal number is ok, and
 			// corresponds to a trailing part with no slashes in it).
 			if (segmentIndex != len(p.Segments)-1 && p.Segments[segmentIndex].IsOptional) || p.Trailing {
+				fmt.Print("zz")
 				return Match{}, false
 			}
 		} else {
