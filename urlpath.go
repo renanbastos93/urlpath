@@ -123,10 +123,7 @@ func New(path string) Path {
 				}
 				continue
 			}
-			outSegments[i] = Segment{
-				IsParam:    true,
-				IsOptional: false,
-				Param:      inSegments[i][1:]}
+			outSegments[i] = Segment{IsParam: true, Param: inSegments[i][1:]}
 		} else {
 			outSegments[i] = Segment{IsParam: false, Const: inSegments[i]}
 		}
@@ -169,8 +166,10 @@ func (p *Path) Match(s string) (Match, bool) {
 			// trailing input is allowed, it's never ok for an input to have fewer
 			// slashes than the path has segments (an equal number is ok, and
 			// corresponds to a trailing part with no slashes in it).
-			if (segmentIndex != len(p.Segments)-1 && p.Segments[segmentIndex].IsOptional) || p.Trailing {
-				return Match{}, false
+			if segmentIndex != len(p.Segments)-1 || p.Trailing {
+				if p.Segments[segmentIndex].IsOptional {
+					return Match{}, false
+				}
 			}
 		} else {
 			// If we have slashes left over and we are not ok with trailing input,
@@ -190,6 +189,7 @@ func (p *Path) Match(s string) (Match, bool) {
 
 		s = s[j:]
 	}
+
 	return Match{Params: params, Trailing: s}, true
 }
 
